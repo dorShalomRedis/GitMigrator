@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="$PROJECT_DIR$/SM" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/SM-UI-Refresh" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/SM/SM" vcs="Git" />
+  </component>
+</project>
