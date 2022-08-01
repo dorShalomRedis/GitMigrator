@@ -1,6 +1,6 @@
 {
   "source_repo_url": "https://github.com/redislabsdev/SM.git",
   "dest_repo_url": "https://github.com/redislabsdev/SM-UI-Refresh.git",
-  "path_to_migrate": "e2e-automation/new-infrastructure/tests/active-active/sm-api-casual-consistency/01-sm-api-casual-consistency.ts",
-  "path_in_dest": "automation/tests/active-active/sm-api-casual-consistency"
+  "path_to_migrate": "path_in_source",
+  "path_in_dest": "path_in_dest"
 }
