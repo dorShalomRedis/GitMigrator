@@ -20,7 +20,7 @@ def check_paths(paths):
     for path in paths:
         if os.path.isdir(path):
             answer = input(
-                f'{path} directory already exist in the current path, do you want to remove it? (y/n)')
+                f'{path} directory already exist in the current path, do you want to remove it (y/n)? ')
             if answer == 'y':
                 shutil.rmtree(path, ignore_errors=True)
             else:
