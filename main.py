@@ -46,6 +46,14 @@ def check_none(paths):
     return False
 
 
+def copy(source_path, dest_path):
+    if os.path.isdir(source_path):
+        shutil.copytree(source_path, dest_path)
+    else:
+        os.makedirs(dest_path)
+        shutil.copy(source_path, dest_path)
+
+
 def execute():
     load_params()
     source_repo_path = regex_search(r'([^\/]+).git', source_repo_url)
@@ -70,8 +78,7 @@ def execute():
     path_filter = git_filter_repo.RepoFilter(args)
     path_filter.run()
     print(f'step 5/11: Move files from {path_to_migrate} to {path_in_dest}')
-    os.makedirs(path_in_dest)
-    shutil.move(path_to_migrate, path_in_dest)
+    copy(path_to_migrate, path_in_dest)
     print(f'step 6/11: delete {base_source_path}')
     shutil.rmtree(base_source_path, ignore_errors=True)
     print(f'step 7/11: git add . (in source repo)')
