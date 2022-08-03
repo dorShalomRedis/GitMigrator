@@ -7,34 +7,26 @@ import re
 
 
 def load_params():
-    global source_repo_url, dest_repo_url, path_to_migrate, path_in_dest
+    global source_repo_url, dest_repo_url, paths_to_migrate, paths_in_dest
     with open('params.json', 'r') as json_file:
         params = json.load(json_file)
         source_repo_url = params['source_repo_url']
         dest_repo_url = params['dest_repo_url']
-        path_to_migrate = params['path_to_migrate']
-        path_in_dest = params['path_in_dest']
+        paths_to_migrate = params['paths_to_migrate']
+        paths_in_dest = params['paths_in_dest']
 
 
-def check_paths(paths):
+def check_dirs_exist(paths):
     for path in paths:
         if os.path.isdir(path):
             answer = input(
-                f'{path} directory already exist in the current path, do you want to remove it (y/n)? ')
+                f'{path} directory already exist in the current path, do you want to remove it? (y/n)')
             if answer == 'y':
                 shutil.rmtree(path, ignore_errors=True)
             else:
                 print('stopping the script')
                 return False
     return True
-
-
-def regex_search(regex, string):
-    search = re.search(regex, string)
-    if search is None:
-        return None
-    else:
-        return search.group(1)
 
 
 def check_none(paths):
@@ -46,49 +38,76 @@ def check_none(paths):
     return False
 
 
-def copy(source_path, dest_path):
-    if os.path.isdir(source_path):
-        shutil.copytree(source_path, dest_path)
+def check_paths():
+    if len(paths_to_migrate) != len(paths_in_dest):
+        print('Number of paths_to_migrate does not match paths_in_dest')
+        print('Stopping the script')
+        return True
+    return False
+
+
+def regex_search(regex, string):
+    search = re.search(regex, string)
+    if search is None:
+        return None
     else:
-        os.makedirs(dest_path)
-        shutil.copy(source_path, dest_path)
+        return search.group(1)
+
+
+def copy():
+    for i in range(0, len(paths_to_migrate)):
+        if os.path.isdir(paths_to_migrate[i]):
+            shutil.copytree(paths_to_migrate[i], paths_in_dest[i])
+        else:
+            os.makedirs(paths_in_dest[i])
+            shutil.copy(paths_to_migrate[i], paths_in_dest[i])
+
+
+def filter_paths():
+    args_list = ['--force']
+    global base_source_paths
+    base_source_paths = set()
+    for path_to_migrate in paths_to_migrate:
+        base_source_paths.add(regex_search(r'^(.*?)\/', path_to_migrate))
+        args_list.append('--path')
+        args_list.append(path_to_migrate)
+    args = git_filter_repo.FilteringOptions.parse_args(args_list)
+    path_filter = git_filter_repo.RepoFilter(args)
+    path_filter.run()
 
 
 def execute():
     load_params()
     source_repo_path = regex_search(r'([^\/]+).git', source_repo_url)
     dest_repo_path = regex_search(r'([^\/]+).git', dest_repo_url)
-    base_source_path = regex_search(r'^(.*?)\/', path_to_migrate)
     # checks
-    if check_none([source_repo_path, dest_repo_path, base_source_path]) \
-            or not check_paths([source_repo_path, dest_repo_path]):
+    if check_none([source_repo_path, dest_repo_path]) \
+            or not check_dirs_exist([source_repo_path, dest_repo_path]):
         return
     # migration process
-    print(f'step 1/11: clone {source_repo_url}.')
+    print(f'step 1/10: clone {source_repo_url}.')
     source_repo = git.Git(source_repo_path)
     source_repo.clone(source_repo_url)
-    print(f'step 2/11: clone {dest_repo_url}.')
+    print(f'step 2/10: clone {dest_repo_url}.')
     dest_repo = git.Git(dest_repo_path)
     dest_repo.clone(dest_repo_url)
-    print(f'step 3/11: remove remote')
+    print(f'step 3/10: remove remote')
     source_repo.execute(['git', 'remote', 'rm', 'origin'])
     os.chdir(source_repo_path)  # filter occurs in cwd
-    print(f'step 4/11: filter {path_to_migrate} history and delete the rest of the repo.')
-    args = git_filter_repo.FilteringOptions.parse_args(['--path', path_to_migrate, '--force'])
-    path_filter = git_filter_repo.RepoFilter(args)
-    path_filter.run()
-    print(f'step 5/11: Move files from {path_to_migrate} to {path_in_dest}')
-    copy(path_to_migrate, path_in_dest)
-    print(f'step 6/11: delete {base_source_path}')
-    shutil.rmtree(base_source_path, ignore_errors=True)
-    print(f'step 7/11: git add . (in source repo)')
+    print(f'step 4/10: filter desired paths history and delete the rest of the repo.')
+    filter_paths()
+    print(f'step 5/10: Move files from source paths to dest paths')
+    copy()
+    print(f'step 6/10: delete old trees')
+    [shutil.rmtree(path, ignore_errors=True) for path in base_source_paths]
+    print(f'step 7/10: git add . (in source repo)')
     source_repo.execute(['git', 'add', '.'])
-    print(f'step 8/11: git commit (in source repo)')
-    source_repo.execute(['git', 'commit', '-m', f'"prepare {path_to_migrate} for migration"'])
+    print(f'step 8/10: git commit (in source repo)')
+    source_repo.execute(['git', 'commit', '-m', f'"prepare for migration"'])
     os.chdir(f'../{dest_repo_path}')
-    print(f'step 9/11: add source repo as remote to dest repo')
+    print(f'step 9/10: add source repo as remote to dest repo')
     dest_repo.execute(['git', 'remote', 'add', 'src', f'../{source_repo_path}'])
-    print(f'step 10/11: pull changes from source repo to dest repo')
+    print(f'step 10/10: pull changes from source repo to dest repo')
     dest_repo.execute(['git', 'pull', 'src', 'master', '--allow-unrelated-histories'])
     print(f'\nNow its time to open {dest_repo_path} in your ide and make it work!')
     print('Next steps should be fixing the imports and make the project compile.')
