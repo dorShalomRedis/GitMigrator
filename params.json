@@ -1,6 +1,6 @@
 {
   "source_repo_url": "https://github.com/redislabsdev/SM.git",
   "dest_repo_url": "https://github.com/redislabsdev/SM-UI-Refresh.git",
-  "path_to_migrate": ["list", "of", "files", "and directories", "to migrate"],
-  "path_in_dest": ["list", "of", "files", "and directories", "must match path_to_migrate"]
+  "paths_to_migrate": ["list", "of", "files", "and directories", "to migrate"],
+  "paths_in_dest": ["list", "of", "directories", "must match paths_to_migrate"]
 }
