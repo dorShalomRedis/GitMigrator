@@ -59,7 +59,7 @@ def copy():
         if os.path.isdir(paths_to_migrate[i]):
             shutil.copytree(paths_to_migrate[i], paths_in_dest[i])
         else:
-            os.makedirs(paths_in_dest[i])
+            os.makedirs(paths_in_dest[i] if os.path.isdir(paths_in_dest[i]) else paths_in_dest[i].rsplit('/', 1)[0])
             shutil.copy(paths_to_migrate[i], paths_in_dest[i])
 
 
