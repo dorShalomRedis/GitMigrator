@@ -59,7 +59,9 @@ def copy():
         if os.path.isdir(paths_to_migrate[i]):
             shutil.copytree(paths_to_migrate[i], paths_in_dest[i])
         else:
-            os.makedirs(paths_in_dest[i] if os.path.isdir(paths_in_dest[i]) else paths_in_dest[i].rsplit('/', 1)[0])
+            dest_path = paths_in_dest[i] if os.path.isdir(paths_in_dest[i]) else paths_in_dest[i].rsplit('/', 1)[0]
+            if not os.path.exists(dest_path):
+                os.makedirs(dest_path)
             shutil.copy(paths_to_migrate[i], paths_in_dest[i])
 
 
@@ -108,7 +110,7 @@ def execute():
     print(f'step 9/10: add source repo as remote to dest repo')
     dest_repo.execute(['git', 'remote', 'add', 'src', f'../{source_repo_path}'])
     print(f'step 10/10: pull changes from source repo to dest repo')
-    dest_repo.execute(['git', 'pull', 'src', 'master', '--allow-unrelated-histories'])
+    dest_repo.execute(['git', 'pull', 'src', 'master', '--allow-unrelated-histories', '--no-ff'])
     print(f'\nNow its time to open {dest_repo_path} in your ide and make it work!')
     print('Next steps should be fixing the imports and make the project compile.')
     print(f'Afterwards push the changes to {dest_repo_url} and merge "as is" without Squash!!')
