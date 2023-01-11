@@ -7,7 +7,7 @@ Then it adds them to the requested path in the dest repo.
 The rest of the work should be done manually.
 
 ## Prerequisite   
-`Have Python3 installed`
+Have Python3 installed
 
 ## Install 
 `python3 setup.py install`
