@@ -4,7 +4,7 @@ It was created for specific task [SM to SM-UI-Refresh Migration](https://github.
 
 In high level the script takes a file or directory from a source repo and deletes all the repo's history except the requested files and their history.
 Then it adds them to the requested path in the dest repo.
-The rest of the work shold be done manually.
+The rest of the work should be done manually.
 
 ## Install 
 `python3 setup.py install`
