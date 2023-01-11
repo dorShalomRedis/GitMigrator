@@ -6,6 +6,9 @@ In high level the script takes a file or directory from a source repo and delete
 Then it adds them to the requested path in the dest repo.
 The rest of the work should be done manually.
 
+## Prerequisite   
+`Have Python3 installed`
+
 ## Install 
 `python3 setup.py install`
 
