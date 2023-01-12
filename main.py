@@ -7,13 +7,14 @@ import re
 
 
 def load_params():
-    global source_repo_url, dest_repo_url, paths_to_migrate, paths_in_dest
+    global source_repo_url, dest_repo_url, paths_to_migrate, paths_in_dest, source_remote_branch
     with open('params.json', 'r') as json_file:
         params = json.load(json_file)
         source_repo_url = params['source_repo_url']
         dest_repo_url = params['dest_repo_url']
         paths_to_migrate = params['paths_to_migrate']
         paths_in_dest = params['paths_in_dest']
+        source_remote_branch = params['source_remote_branch']
 
 
 def check_dirs_exist(paths):
@@ -110,7 +111,7 @@ def execute():
     print(f'step 9/10: add source repo as remote to dest repo')
     dest_repo.execute(['git', 'remote', 'add', 'src', f'../{source_repo_path}'])
     print(f'step 10/10: pull changes from source repo to dest repo')
-    dest_repo.execute(['git', 'pull', 'src', 'master', '--allow-unrelated-histories', '--no-ff'])
+    dest_repo.execute(['git', 'pull', 'src', source_remote_branch, '--allow-unrelated-histories', '--no-ff'])
     print(f'\nNow its time to open {dest_repo_path} in your ide and make it work!')
     print('Next steps should be fixing the imports and make the project compile.')
     print(f'Afterwards push the changes to {dest_repo_url} and merge "as is" without Squash!!')
