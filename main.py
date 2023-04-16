@@ -66,14 +66,27 @@ def copy():
             shutil.copy(paths_to_migrate[i], paths_in_dest[i])
 
 
+def delete_old_files():
+    for path in base_source_paths:
+        if path in paths_in_dest:
+            continue
+        if os.path.isdir(path):
+            shutil.rmtree(path, ignore_errors=True)
+        else:
+            os.remove(path)
+
+
 def filter_paths():
     args_list = ['--force']
     global base_source_paths
     base_source_paths = set()
     for path_to_migrate in paths_to_migrate:
-        base_source_paths.add(regex_search(r'^(.*?)\/', path_to_migrate))
+        base_source_paths.add(path_to_migrate if path_to_migrate[-1] != '/' else path_to_migrate[:-1])
         args_list.append('--path')
-        args_list.append(path_to_migrate)
+        if path_to_migrate == '.':
+            args_list.append('')
+        else:
+            args_list.append(path_to_migrate)
     args = git_filter_repo.FilteringOptions.parse_args(args_list)
     path_filter = git_filter_repo.RepoFilter(args)
     path_filter.run()
@@ -102,7 +115,7 @@ def execute():
     print(f'step 5/10: Move files from source paths to dest paths')
     copy()
     print(f'step 6/10: delete old trees')
-    [shutil.rmtree(path, ignore_errors=True) for path in base_source_paths]
+    delete_old_files()
     print(f'step 7/10: git add . (in source repo)')
     source_repo.execute(['git', 'add', '.'])
     print(f'step 8/10: git commit (in source repo)')
